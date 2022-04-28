@@ -48,7 +48,7 @@ const VideoConatiner = (props) => {
                 <div className="card-body">
                     <h5 className="card-title h5">Your ID: </h5>
                     <p className="card-text">{props.yourID}</p>
-                    {/* <p className="card-text">Audio ID: {audioTrack.id}</p> */}
+                    <p className="card-text">Audio ID: {audioTrack.id}</p>
                 </div>
                 <div className="card-footer d-flex justify-content-center">
                     {!showAudio && micOnComponent}

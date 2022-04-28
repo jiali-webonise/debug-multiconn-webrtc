@@ -41,14 +41,14 @@ const PartnerVideoContainer = (props) => {
             console.log("error peer: ", props.peer);
         });
 
-        // if (props.partnerAudioUserId === props.partnerID && audioTrack) {
-        //     const audio = audioTrack;
-        //     audio.enabled = props.partnerAudioStatus;
-        //     setAudioTrack(audio);
-        //     setShowAudio(!props.partnerAudioStatus);
-        // }
+        if (props.partnerAudioUserId === props.partnerID && audioTrack) {
+            const audio = audioTrack;
+            audio.enabled = props.partnerAudioStatus;
+            setAudioTrack(audio);
+            setShowAudio(!props.partnerAudioStatus);
+        }
 
-    }, [props.peer]);//,props.partnerAudioUserId, props.partnerAudioStatus
+    }, [props.peer, props.partnerAudioUserId, props.partnerAudioStatus]);
 
     const micHandler = () => {
         if (audioTrack?.enabled) {
@@ -56,7 +56,7 @@ const PartnerVideoContainer = (props) => {
             const audio = audioTrack;
             audio.enabled = false;
             setAudioTrack(audio);
-            // props.onTurnOffAduioSocket(props.partnerID);
+            props.onTurnOffAduioSocket(props.partnerID);
             //show enable mic icon
             setShowAudio(true);
         } else {
@@ -65,7 +65,7 @@ const PartnerVideoContainer = (props) => {
             audioTrack.enabled = true;
             setAudioTrack(audio);
 
-            // props.onTurnOnAudioSocket(props.partnerID);
+            props.onTurnOnAudioSocket(props.partnerID);
             //show disable mic icon
             setShowAudio(false);
         }
@@ -86,7 +86,6 @@ const PartnerVideoContainer = (props) => {
                 {!showAudio && audioTrack && micOnComponent}
                 {showAudio && audioTrack && micOffComponent}
             </div>
-            {/* {onStream && <button type="button" className="btn btn-warning mx-3" onClick={sendPartnerStream}>Send stream</button>} */}
         </>)
 
     return (<>

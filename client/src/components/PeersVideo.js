@@ -1,22 +1,20 @@
 import React from 'react';
 import PartnerVideoContainer from './PartnerVideoContainer';
 
-const PeersVideo = ({ partnerAudioUserId, showPartnerVideo, peers }) => {
-    //, partnerAudioStatus, onTurnOffAduioSocket, onTurnOnAudioSocket, onSendStreamToPartner
-    //&& partnerAudioUserId !== ''
+const PeersVideo = ({ partnerAudioUserId, partnerAudioStatus, showPartnerVideo, peers, onTurnOffAduioSocket, onTurnOnAudioSocket }) => {
+
     return (<>{
-        showPartnerVideo && peers.length > 0
+        showPartnerVideo && partnerAudioUserId !== '' && peers.length > 0
         && peers.map((peer, index) => {
             return (
                 <PartnerVideoContainer
                     key={index}
                     peer={peer.peer}
                     partnerID={peer.partnerID}
-                // partnerAudioUserId={partnerAudioUserId}
-                // partnerAudioStatus={partnerAudioStatus}
-                // onSendStreamToPartner={onSendStreamToPartner}
-                // onTurnOffAduioSocket={onTurnOffAduioSocket}
-                // onTurnOnAudioSocket={onTurnOnAudioSocket}
+                    partnerAudioUserId={partnerAudioUserId}
+                    partnerAudioStatus={partnerAudioStatus}
+                    onTurnOffAduioSocket={onTurnOffAduioSocket}
+                    onTurnOnAudioSocket={onTurnOnAudioSocket}
                 />
             );
         })
