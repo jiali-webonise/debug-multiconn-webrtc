@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PeersVideo from './components/PeersVideo';
-import MediaContainer from './components/MediaContainer';
+import VideoContainer from './components/VideoContainer';
 import CallInfo from './components/CallInfo';
 import CallInfoList from './components/CallInfoList';
 
@@ -150,7 +150,29 @@ function App() {
 
     socket.current.on("refresh users", (users) => {
       setUsers(users);
-    })
+    });
+
+    socket.current.on("turnOnPartnerAudio", (data) => {
+      // setYourAudioStatus(true)//on
+    });
+
+    socket.current.on("turnOffPartnerAudio", (data) => {
+      // setYourAudioStatus(false)//off
+    });
+
+    socket.current.on("unmute user", (data) => {
+      console.log(`unmute ${data.userId}`);
+      // setPartnerAudioStatus(true);
+      // setPartnerAudioUserId(data.userId);
+      // console.log("unmute partnerAudioStatus", partnerAudioStatus);
+    });
+
+    socket.current.on("mute user", (data) => {
+      console.log(`mute ${data.userId}`);
+      // setPartnerAudioStatus(false);
+      // setPartnerAudioUserId(data.userId);
+      // console.log("mute partnerAudioStatus", partnerAudioStatus);
+    });
   }, []);
 
   const showAlert = (msg) => {
@@ -160,6 +182,34 @@ function App() {
     setTimeout(() => {
       setNotification('');
     }, 5000)
+  }
+
+  const turnOnPartnerAudioSocketHandler = (id) => {
+    if (underCall) {
+      socket.current.emit('turn on partner audio', { requestId: yourID, partnerID: id });
+    }
+  }
+
+  const turnOffPartnerAudioSocketHandler = (id) => {
+    if (underCall) {
+      socket.current.emit('turn off partner audio', { requestId: yourID, partnerID: id });
+    }
+  }
+
+  const turnOnSelfAudioSocketHandler = (id, status) => {
+    // setYourAudioStatus(status);
+    console.log('turnOnSelfAudioSocketHandler', status)
+    if (underCall) {
+      socket.current.emit('turn on self audio', { userId: id });//all connect partners
+    }
+  }
+
+  const turnOffSelfAudioSocketHandler = (id, status) => {
+    // setYourAudioStatus(status);
+    console.log('turnOffSelfAudioSocketHandler', status)
+    if (underCall) {
+      socket.current.emit('turn off self audio', { userId: id });
+    }
   }
 
   function callPeer(id) {
@@ -275,13 +325,6 @@ function App() {
     window.location.href = BASE_URL;
   }
 
-  let UserVideo;
-  if (stream) {
-    UserVideo = (
-      <video className='video-style' playsInline muted ref={userVideo} autoPlay />
-    );
-  }
-
   let incomingCall;
   if (receivingCall) {
     incomingCall = (<div className="card mt-3 mb-3">
@@ -346,22 +389,15 @@ function App() {
     </div>
     <div className='container container-sm'>
       <div className="row">
+        {stream && <VideoContainer
+          stream={stream}
+          yourID={yourID}
+        />}
+        {/*  yourAudioStatus={yourAudioStatus}
+          onTurnOffAduioSocket={turnOffSelfAudioSocketHandler}
+          onTurnOnAudioSocket={turnOnSelfAudioSocketHandler} */}
         <div className="col col-md">
           <div className="card mt-3">
-            {UserVideo}
-            <div className="card-body">
-              <h5 className="card-title h5">Your ID: </h5>
-              <p className="card-text">{yourID}</p>
-            </div>
-          </div>
-        </div>
-        <div className="col col-md">
-          <div className="card mt-3">
-            {/* {showPartnerVideo && peers.length > 0 && peers.map((peer, index) => {
-              return (
-                <MediaContainer key={index} peer={peer.peer} partnerID={peer.partnerID} />
-              );
-            })} */}
             <PeersVideo
               showPartnerVideo={showPartnerVideo}
               peers={peers}
