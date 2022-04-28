@@ -16,23 +16,22 @@ function App() {
   const BASE_URL = process.env.REACT_APP_ENVIRONMENT === 'PRODUCTION' ? process.env.REACT_APP_BASE_URL_PROD : process.env.REACT_APP_BASE_URL_DEV;
   // console.log(BASE_URL);
   const [underCall, setUnderCall] = useState(false);
-  const [finishCall, setFinishCall] = useState(false);
   const [sendCall, setSendCall] = useState(false);
+  const [receivingCall, setReceivingCall] = useState(false);
+  const [callAccepted, setCallAccepted] = useState(false);
+  const showPartnerVideo = callAccepted || underCall;
 
   const [yourID, setYourID] = useState("");
   const [peers, setPeers] = useState([]);
 
   const [users, setUsers] = useState({});
   const [stream, setStream] = useState();
-  const [receivingCall, setReceivingCall] = useState(false);
-  const [caller, setCaller] = useState("");
 
+  const [caller, setCaller] = useState("");
   const [callerSignal, setCallerSignal] = useState();
-  const [callAccepted, setCallAccepted] = useState(false);
 
   const [callInfo, setCallInfo] = useState();
   const [callInfoList, setCallInfoList] = useState([]);
-  const showPartnerVideo = callAccepted || underCall;
 
   const [notification, setNotification] = useState("");
 
@@ -49,10 +48,10 @@ function App() {
 
     socket.current.on("yourID", (id) => {
       setYourID(id);
-    })
+    });
     socket.current.on("allUsers", (users) => {
       setUsers(users);
-    })
+    });
 
     socket.current.on("deprecated user", (data) => {
       alert(`Cannot call ${data.userToCall}, this user is deprecated`);
@@ -91,7 +90,7 @@ function App() {
       });
 
       callingInfo = data.callInfo;
-    })
+    });
 
     //handle user leave
     socket.current.on("user left", (data) => {
@@ -100,10 +99,6 @@ function App() {
       const hasThisUser = data.userLeft === callingInfo?.caller || data.userLeft === callingInfo?.receiver;
       if (callingInfo?.calling && hasThisUser) {
         console.log("hasThisUser but didn't finish call");
-        console.log("peers", peers);
-        console.log("callingInfo: ", callingInfo);
-        console.log("callingInfoList: ", JSON.stringify(callingInfoList));
-        console.log("localPeers: ", JSON.stringify(localPeers));
         setSendCall(false);
         setReceivingCall(false);
       }
@@ -118,7 +113,7 @@ function App() {
         setCallInfo(callingInfo);
         let newCallingInfoList = [];
         const existCallInfo = callingInfoList.find(info => (info?.caller === data.userLeft || info?.receiver === data.userLeft));
-        console.log(existCallInfo);
+
         if (!existCallInfo) {
           //Caller calls this user but the user has gone, and its peer object has been destroyed
           //redirect to clean up
@@ -131,11 +126,9 @@ function App() {
           newCallingInfoList.push(existCallInfo);
           callingInfoList = newCallingInfoList;
           setCallInfoList(callingInfoList);
-          console.log("user left callingInfoList: ", callingInfoList);
-          console.log("user left localPeers: ", localPeers);
+
           const restConnectedPeers = localPeers.filter(p => (p.partnerID !== data.userLeft && p.peer._connected));
           if (restConnectedPeers.length === 0) {
-            setFinishCall(true);
             socket.current.emit("updateUsers after disconnection", callingInfo);
             alert("All Peers left, streaming ends");
             //connection ends and clean up by redirect
@@ -143,10 +136,9 @@ function App() {
           }
           setSendCall(false);
           setReceivingCall(false);
-          setFinishCall(false);
         }
       }
-    })
+    });
 
     socket.current.on("refresh users", (users) => {
       setUsers(users);
@@ -361,14 +353,14 @@ function App() {
   }
 
   let callInfoComponent;
-  if (!finishCall && callInfo) {
+  if (callInfo) {
     callInfoComponent = (
       <CallInfo title={"Recent Call"} callInfo={callInfo} />
     )
   }
 
   let callInfoListComponent;
-  if (!finishCall && callInfoList.length > 0) {
+  if (callInfoList.length > 0) {
     callInfoListComponent = (
       <CallInfoList title="Call History" callInfoList={callInfoList} />
     )
@@ -410,7 +402,7 @@ function App() {
         </div>
       </div>
       <div>
-        {users && !finishCall && !underCall && Object.keys(users).map(key => {
+        {users && !underCall && Object.keys(users).map(key => {
           if (key === yourID) {
             return null;
           }
@@ -426,7 +418,6 @@ function App() {
         {underCall && underCallpeers}
         {callInfoComponent}
         {callInfoListComponent}
-        {finishCall && <button type='button' className="btn btn-info mt-3" onClick={leaveRoom}>Leave this room to start new call</button>}
       </div>
     </div ></>
   );
