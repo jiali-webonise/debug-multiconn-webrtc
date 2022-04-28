@@ -71,6 +71,9 @@ function App() {
       setCallInfoList(prev => {
         return [...prev, data.callInfo]
       });
+      setPartnerAudioStatus(data.callerAudioStatus);
+      setPartnerAudioUserId(data.from);
+      console.log("hey partnerAudioStatus", data.callerAudioStatus);
       callingInfo = data.callInfo;
       callingInfoList.push(data.callInfo);
     });
@@ -161,24 +164,24 @@ function App() {
     });
 
     socket.current.on("turnOnPartnerAudio", (data) => {
-      // setYourAudioStatus(true)//on
+      setYourAudioStatus(true)//on
     });
 
     socket.current.on("turnOffPartnerAudio", (data) => {
-      // setYourAudioStatus(false)//off
+      setYourAudioStatus(false)//off
     });
 
     socket.current.on("unmute user", (data) => {
       console.log(`unmute ${data.userId}`);
-      // setPartnerAudioStatus(true);
-      // setPartnerAudioUserId(data.userId);
+      setPartnerAudioStatus(true);
+      setPartnerAudioUserId(data.userId);
       // console.log("unmute partnerAudioStatus", partnerAudioStatus);
     });
 
     socket.current.on("mute user", (data) => {
       console.log(`mute ${data.userId}`);
-      // setPartnerAudioStatus(false);
-      // setPartnerAudioUserId(data.userId);
+      setPartnerAudioStatus(false);
+      setPartnerAudioUserId(data.userId);
       // console.log("mute partnerAudioStatus", partnerAudioStatus);
     });
   }, []);
@@ -205,7 +208,7 @@ function App() {
   }
 
   const turnOnSelfAudioSocketHandler = (id, status) => {
-    // setYourAudioStatus(status);
+    setYourAudioStatus(status);
     console.log('turnOnSelfAudioSocketHandler', status)
     if (underCall) {
       socket.current.emit('turn on self audio', { userId: id });//all connect partners
@@ -213,7 +216,7 @@ function App() {
   }
 
   const turnOffSelfAudioSocketHandler = (id, status) => {
-    // setYourAudioStatus(status);
+    setYourAudioStatus(status);
     console.log('turnOffSelfAudioSocketHandler', status)
     if (underCall) {
       socket.current.emit('turn off self audio', { userId: id });
@@ -249,7 +252,8 @@ function App() {
         userToCall: id,
         signalData: data,
         from: yourID,
-        channelName: peer.channelName
+        channelName: peer.channelName,
+        callerAudioStatus: yourAudioStatus
       })
     })
 
@@ -291,7 +295,9 @@ function App() {
       peer.signal(data.signal);
       socket.current.emit("update after successful connection", {
         callInfo: data.callInfo
-      })
+      });
+      setPartnerAudioStatus(data.receiverAudioStatus);
+      setPartnerAudioUserId(data.peerID);
     })
     setPeers(prev => [...prev, { peer: peer, partnerID: id }]);
     localPeers.push({ peer: peer, partnerID: id });
@@ -301,6 +307,8 @@ function App() {
     setSendCall(false);
     setCallAccepted(true);
     setReceivingCall(false);
+    setPartnerAudioStatus(callInfo.callerAudioStatus);
+    setPartnerAudioUserId(callInfo.caller);
     const peer = new Peer({
       initiator: false,
       trickle: false,
@@ -308,7 +316,13 @@ function App() {
     });
 
     peer.on("signal", data => {
-      socket.current.emit("acceptCall", { signal: data, to: caller, from: yourID, callInfo: callInfo })
+      socket.current.emit("acceptCall", {
+        signal: data,
+        to: caller,
+        from: yourID,
+        callInfo: callInfo,
+        receiverAudioStatus: yourAudioStatus
+      })
     })
 
     peer.on('error', (err) => {
@@ -321,7 +335,7 @@ function App() {
       peer.destroy();
     })
 
-    setPeers(prev => [...prev, { peer: peer, partnerID: caller, completed: false }]);
+    setPeers(prev => [...prev, { peer: peer, partnerID: caller }]);
     setUnderCall(true);
     peer.signal(callerSignal);
     localPeers.push({ peer: peer, partnerID: caller });
@@ -419,20 +433,20 @@ function App() {
         {stream && <VideoContainer
           stream={stream}
           yourID={yourID}
-        />}
-        {/*  yourAudioStatus={yourAudioStatus}
+          yourAudioStatus={yourAudioStatus}
           onTurnOffAduioSocket={turnOffSelfAudioSocketHandler}
-          onTurnOnAudioSocket={turnOnSelfAudioSocketHandler} */}
+          onTurnOnAudioSocket={turnOnSelfAudioSocketHandler}
+        />}
         <div className="col col-md">
           <div className="card mt-3">
             <PeersVideo
               showPartnerVideo={showPartnerVideo}
               peers={peers}
-            />
-            {/* partnerAudioUserId={partnerAudioUserId}
+              partnerAudioUserId={partnerAudioUserId}
               partnerAudioStatus={partnerAudioStatus}
               onTurnOffAduioSocket={turnOffPartnerAudioSocketHandler}
-              onTurnOnAudioSocket={turnOnPartnerAudioSocketHandler} */}
+              onTurnOnAudioSocket={turnOnPartnerAudioSocketHandler}
+            />
           </div>
         </div>
       </div>
