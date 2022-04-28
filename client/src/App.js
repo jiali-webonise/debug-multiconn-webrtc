@@ -22,6 +22,11 @@ function App() {
   const showPartnerVideo = callAccepted || underCall;
 
   const [yourID, setYourID] = useState("");
+
+  const [yourAudioStatus, setYourAudioStatus] = useState(true);
+  const [partnerAudioUserId, setPartnerAudioUserId] = useState("");
+  const [partnerAudioStatus, setPartnerAudioStatus] = useState(true);
+
   const [peers, setPeers] = useState([]);
 
   const [users, setUsers] = useState({});
@@ -68,6 +73,17 @@ function App() {
       });
       callingInfo = data.callInfo;
       callingInfoList.push(data.callInfo);
+    });
+
+    socket.current.on("reject call", (data) => {
+      showAlert(`Your call has been rejected by ${data.from}`);
+      setCallInfo(data.callInfo);
+      callingInfo = data.callInfo;
+      callingInfoList.push(data.callInfo);
+      setCallInfoList(prev => [...prev, data.callInfo]);
+      setSendCall(false);
+      //reset peers
+      setPeers([]);
     });
 
     // socket.current.on("beingCalled", (data) => {
@@ -205,6 +221,7 @@ function App() {
   }
 
   function callPeer(id) {
+    callingInfo = { receiver: id };
     setSendCall(true);
     const peer = new Peer({
       initiator: true,
@@ -228,7 +245,12 @@ function App() {
     });
 
     peer.on("signal", data => {
-      socket.current.emit("callUser", { userToCall: id, signalData: data, from: yourID, channelName: peer.channelName })
+      socket.current.emit("callUser", {
+        userToCall: id,
+        signalData: data,
+        from: yourID,
+        channelName: peer.channelName
+      })
     })
 
     peer.on('close', () => {
@@ -271,7 +293,7 @@ function App() {
         callInfo: data.callInfo
       })
     })
-    setPeers(prev => [...prev, { peer: peer, partnerID: id, completed: false }]);
+    setPeers(prev => [...prev, { peer: peer, partnerID: id }]);
     localPeers.push({ peer: peer, partnerID: id });
   }
 
@@ -313,8 +335,20 @@ function App() {
     window.location.href = BASE_URL;
   }
 
-  function leaveRoom() {
-    window.location.href = BASE_URL;
+  function rejectCall() {
+    if (!peers || peers.length === 0) {
+      setUnderCall(false);
+    }
+    setReceivingCall(false);
+    setCallAccepted(false);
+    const updatedCallInfo = { ...callInfo, rejected: true };
+    setCallInfo(updatedCallInfo);
+    setCallInfoList(prev => [...prev, updatedCallInfo]);
+    callingInfoList.push(updatedCallInfo);
+    //emit reject socket
+    socket.current.emit("rejectCall", {
+      callInfo: updatedCallInfo
+    });
   }
 
   let incomingCall;
@@ -324,6 +358,7 @@ function App() {
       <div className="card-body">
         {caller} is calling you
         <button type='button' className='btn btn-info mx-3' onClick={acceptCall}>Accept</button>
+        <button type='button' className='btn btn-danger mx-3' onClick={rejectCall}>Reject</button>
       </div>
     </div>
     )
@@ -345,7 +380,7 @@ function App() {
   let callingMessage;
   if (sendCall && !callAccepted) {
     callingMessage = (<div className="card mt-3 mb-3">
-      <h5 className="card-header h3 bg-light text-primary">Calling...</h5>
+      <h5 className="card-header h3 bg-light text-primary">Calling {callingInfo.receiver}...</h5>
       <div className="card-body">
         Waiting for response
       </div>
@@ -402,7 +437,7 @@ function App() {
         </div>
       </div>
       <div>
-        {users && !underCall && Object.keys(users).map(key => {
+        {users && !receivingCall && !sendCall && !underCall && Object.keys(users).map(key => {
           if (key === yourID) {
             return null;
           }
