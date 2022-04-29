@@ -414,7 +414,7 @@ function App() {
     <div className="container">
       {notification && notificationAlert}
     </div>
-    <div className='container container-sm'>
+    <div className='container'>
       <div className="row">
         {stream && <VideoContainer
           stream={stream}
@@ -435,26 +435,28 @@ function App() {
               onTurnOnAudioSocket={turnOnPartnerAudioSocketHandler} */}
           </div>
         </div>
-      </div>
-      <div>
-        {users && !receivingCall && !sendCall && !underCall && Object.keys(users).map(key => {
-          if (key === yourID) {
-            return null;
-          }
 
-          return (
-            <button type='button' className="btn btn-primary mt-3 me-3" key={key} onClick={() => callPeer(key)}>Call {key}</button>
-          );
-        })}
       </div>
-      <div>
-        {receivingCall && incomingCall}
-        {callingMessage}
-        {underCall && underCallpeers}
-        {callInfoComponent}
-        {callInfoListComponent}
-      </div>
-    </div ></>
+    </div >
+    <div className=' container call-buttons'>
+      {users && !receivingCall && !sendCall && !underCall && Object.keys(users).map(key => {
+        if (key === yourID) {
+          return null;
+        }
+
+        return (
+          <button type='button' className="btn btn-primary mt-3 me-3" key={key} onClick={() => callPeer(key)}>Call {key}</button>
+        );
+      })}
+    </div>
+    <div className='container-col'>
+      {receivingCall && incomingCall}
+      {callingMessage}
+      {underCall && underCallpeers}
+      {callInfoComponent}
+      {callInfoListComponent}
+    </div>
+  </>
   );
 }
 

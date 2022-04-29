@@ -44,7 +44,7 @@ const VideoConatiner = (props) => {
     return (
         <div className="col col-md">
             <div className="card mt-3">
-                <video className='video-style' playsInline muted ref={userVideo} autoPlay controls />
+                <video className='video-style' width="400" height="310" playsInline muted ref={userVideo} autoPlay controls />
                 <div className="card-body">
                     <h5 className="card-title h5">Your ID: </h5>
                     <p className="card-text">{props.yourID}</p>

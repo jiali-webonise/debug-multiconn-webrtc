@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import "./PartnerVideoContainer.scss"
 
 const PartnerVideoContainer = (props) => {
     const ref = useRef();
@@ -71,12 +72,12 @@ const PartnerVideoContainer = (props) => {
         }
     }
 
-    const micOnComponent = (<button type="button" className="btn btn btn-outline-dark mx-3" onClick={micHandler}>Unmute</button>);
-    const micOffComponent = (<button type="button" className="btn btn btn-outline-danger mx-3" onClick={micHandler}>Mute</button>);
+    const micOnComponent = (<button type="button" className="btn" onClick={micHandler}>Unmuted</button>);
+    const micOffComponent = (<button type="button" className="btn btn-danger" onClick={micHandler}>Muted</button>);
 
     const partnerVideoVideoComponent = (
         <>
-            <video className='video-style' playsInline autoPlay ref={ref} controls />
+            <video className='video-style' width="400" height="310" playsInline autoPlay ref={ref} controls />
             <div className="card-body">
                 <h5 className="card-title h5">Partner ID: </h5>
                 <p className="card-text">{props.partnerID}</p>
