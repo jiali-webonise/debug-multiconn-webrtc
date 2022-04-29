@@ -25,6 +25,7 @@ const VideoConatiner = (props) => {
         console.log("props.yourAudioStatus", props.yourAudioStatus);
         if (audioTrack) {
             console.log("audioTrack", audioTrack);
+            audioTrack.enabled = props.yourAudioStatus;
         }
         setShowAudio(!props.yourAudioStatus);
     }, [props.yourAudioStatus])

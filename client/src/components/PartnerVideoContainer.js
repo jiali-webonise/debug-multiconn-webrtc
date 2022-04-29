@@ -10,7 +10,12 @@ const PartnerVideoContainer = (props) => {
     useEffect(() => {
         props.peer.on("stream", stream => {
             ref.current.srcObject = stream;
+            alert("on streaming PartnerVideoContainer");
             const audio = stream.getTracks()?.find(track => track.kind === 'audio');
+            // alert('audio');
+            // alert(JSON.stringify(audio));
+            // alert('stream');
+            // alert(JSON.stringify(stream));
             // console.log("in useeffect on stream audio");
             // console.log(audio);
             // if (props.partnerAudioUserId === props.partnerID) {
@@ -23,23 +28,31 @@ const PartnerVideoContainer = (props) => {
         })
 
         props.peer.on("connect", () => {
-            console.log("Partner peer connected....")
+            console.log("Partner peer connected....");
+            alert('connect');
         })
 
         props.peer.on('track', (track, stream) => {
             console.log("on track: ", track);
             console.log("on track stream", stream.getTracks().find(track => track.kind === 'audio'));
+            alert('on track');
+            // alert(JSON.stringify(track));
+            // alert('on track stream');
+            // alert(JSON.stringify(stream));
         })
 
         props.peer.on("close", () => {
             setShow(false);
             ref.current = null;
             props.peer.destroy();
+            alert('close');
         });
 
         props.peer.on('error', (err) => {
             console.error(`${JSON.stringify(err)} at MediaContainer error`);
             console.log("error peer: ", props.peer);
+            alert("on error");
+            alert(JSON.stringify(err));
         });
 
         // if (props.partnerAudioUserId === props.partnerID && audioTrack) {
