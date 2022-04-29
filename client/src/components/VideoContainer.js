@@ -21,6 +21,14 @@ const VideoConatiner = (props) => {
 
     }, [props.stream]);//, props.yourAudioStatus
 
+    useEffect(() => {
+        console.log("props.yourAudioStatus", props.yourAudioStatus);
+        if (audioTrack) {
+            console.log("audioTrack", audioTrack);
+        }
+        setShowAudio(!props.yourAudioStatus);
+    }, [props.yourAudioStatus])
+
     const micHandler = () => {
         if (audioTrack.enabled) {
             // disable mic
@@ -38,8 +46,8 @@ const VideoConatiner = (props) => {
         }
     }
 
-    const micOnComponent = (<button type="button" className="btn btn btn-outline-dark mx-3" onClick={micHandler}>Unmute</button>);
-    const micOffComponent = (<button type="button" className="btn btn btn-outline-danger mx-3" onClick={micHandler}>Mute</button>);
+    const micOnComponent = (<button type="button" className="btn" onClick={micHandler}>Unmute</button>);
+    const micOffComponent = (<button type="button" className="btn btn-danger" onClick={micHandler}>Mute</button>);
 
     return (
         <div className="col col-md">

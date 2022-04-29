@@ -51,13 +51,20 @@ const PartnerVideoContainer = (props) => {
 
     }, [props.peer]);//,props.partnerAudioUserId, props.partnerAudioStatus
 
+    // useEffect(() => {
+    //     console.log("props.partnerAudio ID and Status", props.partnerAudioUserId, props.partnerAudioStatus);
+    //     if (audioTrack) {
+    //         console.log("audioTrack", audioTrack);
+    //     }
+    // }, [props.partnerAudioUserId, props.partnerAudioStatus])
+
     const micHandler = () => {
         if (audioTrack?.enabled) {
             // disable mic
             const audio = audioTrack;
             audio.enabled = false;
             setAudioTrack(audio);
-            // props.onTurnOffAduioSocket(props.partnerID);
+            props.onTurnOffAduioSocket(props.partnerID);
             //show enable mic icon
             setShowAudio(true);
         } else {
@@ -66,7 +73,7 @@ const PartnerVideoContainer = (props) => {
             audioTrack.enabled = true;
             setAudioTrack(audio);
 
-            // props.onTurnOnAudioSocket(props.partnerID);
+            props.onTurnOnAudioSocket(props.partnerID);
             //show disable mic icon
             setShowAudio(false);
         }

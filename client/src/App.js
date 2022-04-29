@@ -71,6 +71,9 @@ function App() {
       setCallInfoList(prev => {
         return [...prev, data.callInfo]
       });
+      // setPartnerAudioStatus(data.callerAudioStatus);
+      // setPartnerAudioUserId(data.from);
+      // console.log("hey partnerAudioStatus", data.callerAudioStatus);
       callingInfo = data.callInfo;
       callingInfoList.push(data.callInfo);
     });
@@ -170,16 +173,16 @@ function App() {
 
     socket.current.on("unmute user", (data) => {
       console.log(`unmute ${data.userId}`);
-      // setPartnerAudioStatus(true);
-      // setPartnerAudioUserId(data.userId);
-      // console.log("unmute partnerAudioStatus", partnerAudioStatus);
+      setPartnerAudioStatus(true);
+      setPartnerAudioUserId(data.userId);
+      console.log("unmute partnerAudioStatus", partnerAudioStatus);
     });
 
     socket.current.on("mute user", (data) => {
       console.log(`mute ${data.userId}`);
-      // setPartnerAudioStatus(false);
-      // setPartnerAudioUserId(data.userId);
-      // console.log("mute partnerAudioStatus", partnerAudioStatus);
+      setPartnerAudioStatus(false);
+      setPartnerAudioUserId(data.userId);
+      console.log("mute partnerAudioStatus", partnerAudioStatus);
     });
   }, []);
 
@@ -249,7 +252,8 @@ function App() {
         userToCall: id,
         signalData: data,
         from: yourID,
-        channelName: peer.channelName
+        channelName: peer.channelName,
+        callerAudioStatus: yourAudioStatus
       })
     })
 
@@ -301,6 +305,8 @@ function App() {
     setSendCall(false);
     setCallAccepted(true);
     setReceivingCall(false);
+    // setPartnerAudioStatus(callInfo.callerAudioStatus);
+    // setPartnerAudioUserId(callInfo.caller);
     const peer = new Peer({
       initiator: false,
       trickle: false,
@@ -321,7 +327,7 @@ function App() {
       peer.destroy();
     })
 
-    setPeers(prev => [...prev, { peer: peer, partnerID: caller, completed: false }]);
+    setPeers(prev => [...prev, { peer: peer, partnerID: caller }]);
     setUnderCall(true);
     peer.signal(callerSignal);
     localPeers.push({ peer: peer, partnerID: caller });
@@ -428,11 +434,11 @@ function App() {
             <PeersVideo
               showPartnerVideo={showPartnerVideo}
               peers={peers}
-            />
-            {/* partnerAudioUserId={partnerAudioUserId}
+              partnerAudioUserId={partnerAudioUserId}
               partnerAudioStatus={partnerAudioStatus}
               onTurnOffAduioSocket={turnOffPartnerAudioSocketHandler}
-              onTurnOnAudioSocket={turnOnPartnerAudioSocketHandler} */}
+              onTurnOnAudioSocket={turnOnPartnerAudioSocketHandler}
+            />
           </div>
         </div>
 
