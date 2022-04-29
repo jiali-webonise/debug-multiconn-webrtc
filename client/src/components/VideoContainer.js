@@ -38,8 +38,8 @@ const VideoConatiner = (props) => {
         }
     }
 
-    const micOnComponent = (<button type="button" className="btn btn btn-outline-dark mx-3" onClick={micHandler}><i className="bi bi-mic-fill" style={{ fontSize: 20 }}></i></button>);
-    const micOffComponent = (<button type="button" className="btn btn btn-outline-danger mx-3" onClick={micHandler}><i className="bi bi-mic-mute-fill" style={{ fontSize: 20 }}></i></button>);
+    const micOnComponent = (<button type="button" className="btn btn btn-outline-dark mx-3" onClick={micHandler}>Unmute</button>);
+    const micOffComponent = (<button type="button" className="btn btn btn-outline-danger mx-3" onClick={micHandler}>Mute</button>);
 
     return (
         <div className="col col-md">
