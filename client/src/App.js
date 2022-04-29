@@ -22,6 +22,7 @@ function App() {
   const showPartnerVideo = callAccepted || underCall;
 
   const [yourID, setYourID] = useState("");
+  const [yourPeer, setYourPeer] = useState();
 
   const [yourAudioStatus, setYourAudioStatus] = useState(true);
   const [partnerAudioUserId, setPartnerAudioUserId] = useState("");
@@ -248,6 +249,13 @@ function App() {
     });
 
     peer.on("signal", data => {
+      console.log("callPeer signal data", data)
+      console.log("callingInfoList", callingInfoList);
+      // if (callingInfoList.length > 0) {
+      //   //resignal
+      //   console.log('resend stream');
+      // } else {
+      //   console.log("calluser")
       socket.current.emit("callUser", {
         userToCall: id,
         signalData: data,
@@ -255,6 +263,7 @@ function App() {
         channelName: peer.channelName,
         callerAudioStatus: yourAudioStatus
       })
+      // }
     })
 
     peer.on('close', () => {
@@ -266,7 +275,7 @@ function App() {
     })
 
     peer.on('connect', () => {
-      console.log('connected')
+      console.log('connected');
     })
 
     peer.on('error', (err) => {
@@ -292,11 +301,15 @@ function App() {
       // console.log("callingInfoList: ", callingInfoList);
       setCallAccepted(true);
       setUnderCall(true);
+      console.log("callAccepted data signal", data.signal);
       peer.signal(data.signal);
       socket.current.emit("update after successful connection", {
         callInfo: data.callInfo
       })
+
+
     })
+    setYourPeer(peer);
     setPeers(prev => [...prev, { peer: peer, partnerID: id }]);
     localPeers.push({ peer: peer, partnerID: id });
   }
@@ -314,7 +327,14 @@ function App() {
     });
 
     peer.on("signal", data => {
+      console.log("receiver signal data", data)
+      // console.log("callingInfoList", callingInfoList);
+      // if (callingInfoList.length > 0) {
+      //   console.log('resend stream')
+      // } else {
+      console.log("acceptCall")
       socket.current.emit("acceptCall", { signal: data, to: caller, from: yourID, callInfo: callInfo })
+      // }
     })
 
     peer.on('error', (err) => {
@@ -323,12 +343,13 @@ function App() {
     })
 
     peer.on('close', () => {
-      console.log("peer destroy :", caller)
-      peer.destroy();
+      console.log("peer close :", caller)
+      // peer.destroy();
     })
 
     setPeers(prev => [...prev, { peer: peer, partnerID: caller }]);
     setUnderCall(true);
+    console.log("acceptCall data signal", callerSignal);
     peer.signal(callerSignal);
     localPeers.push({ peer: peer, partnerID: caller });
   }
@@ -355,6 +376,35 @@ function App() {
     socket.current.emit("rejectCall", {
       callInfo: updatedCallInfo
     });
+  }
+
+  async function resendStreamHandler() {
+    console.log("Caller resends Stream");
+    // peer.removeTrack(track, stream)
+    console.log("stream before remove", yourPeer.streams[0].getTracks());
+    yourPeer.removeStream(yourPeer.streams[0]);
+    // console.log("peer after remove", yourPeer);
+    let newStream;
+    await navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(mediastream => {
+      console.log("reget stream");
+      // setStream(mediastream);
+      newStream = mediastream;
+      // if (userVideo.current) {
+      //   userVideo.current.srcObject = mediastream;
+      // }
+    }).catch(err => console.log(err));
+    console.log("newStream", newStream.getTracks());
+    yourPeer.addStream(newStream);
+    // const oldAduioTrack = yourPeer.streams[0].getTracks().find(track => track.kind === 'audio');
+    // const oldVideoTrack = yourPeer.streams[0].getTracks().find(track => track.kind === 'video');
+    // const newAduioTrack = newStream.getTracks().find(track => track.kind === 'audio');
+    // const newVideoTrack = newStream.getTracks().find(track => track.kind === 'video');
+    // console.log("oldAduioTrack", oldAduioTrack);
+    // console.log("newAduioTrack", newAduioTrack)
+    // console.log("oldVideoTrack", oldVideoTrack)
+    // console.log("newVideoTrack", newVideoTrack)
+    // yourPeer.replaceTrack(oldAduioTrack, newAduioTrack, yourPeer.streams[0]);
+    // yourPeer.replaceTrack(oldVideoTrack, newVideoTrack, yourPeer.streams[0]);
   }
 
   let incomingCall;
@@ -444,6 +494,9 @@ function App() {
 
       </div>
     </div >
+    <div className='container-col'>
+      <button type='button' onClick={resendStreamHandler}>Resend stream from caller(Only caller do this)</button>
+    </div>
     <div className=' container call-buttons'>
       {users && !receivingCall && !sendCall && !underCall && Object.keys(users).map(key => {
         if (key === yourID) {
